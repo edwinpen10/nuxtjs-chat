@@ -71,6 +71,11 @@ export default {
   mounted() {
     Pusher.logToConsole = true;
 
+      this.$echo.channel('chat.'+this.id_room)
+      .listen('message', (e) => {
+          console.log(e);
+      });
+
     this.subscibeChannel()
     // const pusher = new Pusher('468f0c2d729723ab5378', {
     //   cluster: 'ap1'
@@ -87,12 +92,14 @@ export default {
   methods: {
     
     subscibeChannel() {
-      const channel = pusher.subscribe(this.id_room);
-      return channel
+      const channel = pusher.subscribe('chat.'+this.id_room);
+       channel.bind('message', data => {
+        this.message.push(data);
+      })
     },
 
     unsubscribeChannel() {
-      pusher.unsubscribe(this.id_room);
+      pusher.unsubscribe('chat.'+this.id_room);
     },
 
     bindingChannel() {
@@ -109,7 +116,7 @@ export default {
       });
        this.chatlist = []
       const listmessage =   await this.$axios.get('http://localhost:8000/api/list/room/chat');
-      this.bindingChannel()
+      console.log(this.subscibeChannel())
       this.chatlist.push(listmessage)
       this.message = '';
     },
