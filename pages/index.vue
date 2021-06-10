@@ -41,6 +41,7 @@
 <script>
 import Pusher from 'pusher-js';
 
+
 export default {
   
 
@@ -77,13 +78,27 @@ export default {
       // });
 
 
-    this.subscibeChannel()
+   // this.subscibeChannel()
     // const pusher = new Pusher('468f0c2d729723ab5378', {
     //   cluster: 'ap1',
     //   authEndpoint: 'http://localhost:8000/api/message'
     // });
 
+    const pusher = new Pusher('468f0c2d729723ab5378', {
+      cluster: 'ap1',
+       authEndpoint: `http://localhost:8000/api/chat/auth/1`,
+    })
+
+    console.log(pusher)
+   
+    const channel = pusher.subscribe(`private-auth-chat.1`);
+      
     
+      
+    //  channel.bind(`chat-auth-events`, data => {
+        
+    //    // this.message.push(data);
+    //   })
 
     // var channel = pusher.subscribe('private-chat.'+this.id_room);
     // channel.bind('message', data => {
@@ -139,8 +154,8 @@ export default {
 
     async getMessage(id) {
          this.id_room = id.toString()
-         this.unsubscribeChannel()
-         this.subscibeChannel()
+        //  this.unsubscribeChannel()
+        //  this.subscibeChannel()
          
       const data = await this.$axios.get(`http://127.0.0.1:8000/api/chat/messages/${id}`);
       if(data.data.data.length===0){
