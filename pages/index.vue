@@ -40,10 +40,10 @@
 
 <script>
 import Pusher from 'pusher-js';
-const pusher = new Pusher('468f0c2d729723ab5378', {
-  cluster: 'ap1'
-})
+
 export default {
+  
+
   data() {
     return {
       id_room: '1',
@@ -63,7 +63,7 @@ export default {
 
      async asyncData({$axios}) {
       const listmessage =  await $axios.get('http://localhost:8000/api/list/room/chat');
-      
+        
       return {listmessage}
     },
 
@@ -71,17 +71,21 @@ export default {
   mounted() {
     Pusher.logToConsole = true;
 
-      this.$echo.channel('chat.'+this.id_room)
-      .listen('message', (e) => {
-          console.log(e);
-      });
+      // this.$echo.channel('chat.'+this.id_room)
+      // .listen('message', (e) => {
+      //     console.log(e);
+      // });
+
 
     this.subscibeChannel()
     // const pusher = new Pusher('468f0c2d729723ab5378', {
-    //   cluster: 'ap1'
+    //   cluster: 'ap1',
+    //   authEndpoint: 'http://localhost:8000/api/message'
     // });
 
-    // var channel = pusher.subscribe(this.id_room);
+    
+
+    // var channel = pusher.subscribe('private-chat.'+this.id_room);
     // channel.bind('message', data => {
     //   this.messages.push(data);
     // });
@@ -89,21 +93,33 @@ export default {
     this.chatlist.push(this.listmessage)
     
   },
+
   methods: {
     
     subscibeChannel() {
-      const channel = pusher.subscribe('chat.'+this.id_room);
-       channel.bind('message', data => {
-        this.message.push(data);
-      })
+      const pusher = new Pusher('468f0c2d729723ab5378', {
+      cluster: 'ap1',
+      authEndpoint: `http://localhost:8000/api/chat/auth/${this.id_room}`
+    })
+      const channel = pusher.subscribe(`private-auth-chat.${this.id_room}`);
+      return channel
     },
 
     unsubscribeChannel() {
-      pusher.unsubscribe('chat.'+this.id_room);
+    const pusher = new Pusher('468f0c2d729723ab5378', {
+      cluster: 'ap1',
+      authEndpoint: `http://localhost:8000/api/chat/auth/${this.id_room}`
+    })
+      pusher.unsubscribe(`private-auth-chat.${this.id_room}`);
     },
 
     bindingChannel() {
-      this.subscibeChannel.bind('message', data => {
+      const pusher = new Pusher('468f0c2d729723ab5378', {
+      cluster: 'ap1',
+      authEndpoint: `http://localhost:8000/api/chat/auth/${this.id_room}`
+    })
+     const channel = pusher.subscribe(`private-auth-chat.${this.id_room}`);
+     channel.bind(`chat-auth-events`, data => {
         this.message.push(data);
       })
     },
@@ -115,8 +131,8 @@ export default {
           message: this.message,
       });
        this.chatlist = []
-      const listmessage =   await this.$axios.get('http://localhost:8000/api/list/room/chat');
-      console.log(this.subscibeChannel())
+      const listmessage = await this.$axios.get('http://localhost:8000/api/list/room/chat');
+      this.bindingChannel()
       this.chatlist.push(listmessage)
       this.message = '';
     },
@@ -125,6 +141,7 @@ export default {
          this.id_room = id.toString()
          this.unsubscribeChannel()
          this.subscibeChannel()
+         
       const data = await this.$axios.get(`http://127.0.0.1:8000/api/chat/messages/${id}`);
       if(data.data.data.length===0){
          this.messages = []
@@ -134,7 +151,7 @@ export default {
             this.messages.push(element)
           });
 
-          console.log(this.messages)
+         
       }
      
      
@@ -155,7 +172,10 @@ export default {
     //   //alert(this.messagesdata)
     // }
   }
+
+
 }
+
 </script>
 
 <style>
