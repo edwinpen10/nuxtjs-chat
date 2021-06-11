@@ -41,6 +41,10 @@
 <script>
 import Pusher from 'pusher-js';
 
+  const pusher = new Pusher('468f0c2d729723ab5378', {
+      cluster: 'ap1',
+       authEndpoint: `http://localhost:8000/api/chat/auth/`,
+    })
 
 export default {
   
@@ -78,26 +82,17 @@ export default {
       // });
 
 
-   // this.subscibeChannel()
+   this.subscibeChannel()
     // const pusher = new Pusher('468f0c2d729723ab5378', {
     //   cluster: 'ap1',
     //   authEndpoint: 'http://localhost:8000/api/message'
     // });
 
-    const pusher = new Pusher('468f0c2d729723ab5378', {
-      cluster: 'ap1',
-       authEndpoint: `http://localhost:8000/api/chat/auth/1`,
-    })
-
-    console.log(pusher)
-   
-    const channel = pusher.subscribe(`private-auth-chat.1`);
-      
-    
+  
+    // const channel = pusher.subscribe(`private-auth-chat.1`);
       
     //  channel.bind(`chat-auth-events`, data => {
-        
-    //    // this.message.push(data);
+    //      this.message.push(data);
     //   })
 
     // var channel = pusher.subscribe('private-chat.'+this.id_room);
@@ -112,30 +107,18 @@ export default {
   methods: {
     
     subscibeChannel() {
-      const pusher = new Pusher('468f0c2d729723ab5378', {
-      cluster: 'ap1',
-      authEndpoint: `http://localhost:8000/api/chat/auth/${this.id_room}`
-    })
-      const channel = pusher.subscribe(`private-auth-chat.${this.id_room}`);
+      const channel = pusher.subscribe(`private-chat.${this.id_room}`);
       return channel
     },
 
     unsubscribeChannel() {
-    const pusher = new Pusher('468f0c2d729723ab5378', {
-      cluster: 'ap1',
-      authEndpoint: `http://localhost:8000/api/chat/auth/${this.id_room}`
-    })
-      pusher.unsubscribe(`private-auth-chat.${this.id_room}`);
+      pusher.unsubscribe(`private-chat.${this.id_room}`);
     },
 
     bindingChannel() {
-      const pusher = new Pusher('468f0c2d729723ab5378', {
-      cluster: 'ap1',
-      authEndpoint: `http://localhost:8000/api/chat/auth/${this.id_room}`
-    })
-     const channel = pusher.subscribe(`private-auth-chat.${this.id_room}`);
-     channel.bind(`chat-auth-events`, data => {
-        this.message.push(data);
+      this.subscibeChannel().bind(`message`, data => {
+        //console.log(data)
+        this.messages.push(data);
       })
     },
 
@@ -154,8 +137,8 @@ export default {
 
     async getMessage(id) {
          this.id_room = id.toString()
-        //  this.unsubscribeChannel()
-        //  this.subscibeChannel()
+        this.unsubscribeChannel()
+        this.subscibeChannel()
          
       const data = await this.$axios.get(`http://127.0.0.1:8000/api/chat/messages/${id}`);
       if(data.data.data.length===0){
