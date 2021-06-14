@@ -51,7 +51,7 @@ export default {
 
   data() {
     return {
-      id_room: '1',
+      id_room: '',
       username: 'username',
       message: '',
       messages: [],
@@ -117,8 +117,19 @@ export default {
 
     bindingChannel() {
       this.subscibeChannel().bind(`message`, data => {
-        //console.log(data)
+        
         this.messages.push(data);
+
+        this.chatlist.forEach(element => {
+          element.data.data.forEach(i => {
+            if(i.room_id==data.room_id){
+              i.chat_message = data.message,
+              i.time = data.time,
+              i.is_read = data.is_read
+            }
+          })
+          });
+        
       })
     },
 
@@ -128,11 +139,12 @@ export default {
            room_id : this.id_room,
           message: this.message,
       });
-       this.chatlist = []
-      const listmessage = await this.$axios.get('http://localhost:8000/api/list/room/chat');
-      this.bindingChannel()
-      this.chatlist.push(listmessage)
       this.message = '';
+      // this.chatlist = []
+      //const listmessage = await this.$axios.get('http://localhost:8000/api/list/room/chat');
+      //this.chatlist.push(listmessage)
+      this.bindingChannel()
+     
     },
 
     async getMessage(id) {
@@ -148,8 +160,6 @@ export default {
         data.data.data.forEach(element => {
             this.messages.push(element)
           });
-
-         
       }
      
      
